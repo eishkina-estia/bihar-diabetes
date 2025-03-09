@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.metrics import mean_squared_error
 import pickle
 import common
-from train import preprocess_data
+from model.train import preprocess_data
 
 DB_PATH = common.CONFIG['paths']['db_path']
 MODEL_PATH = common.CONFIG['paths']['model_path']

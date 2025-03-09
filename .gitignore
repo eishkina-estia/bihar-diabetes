@@ -9,7 +9,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 data/
-models/
+model-registry/
 .idea/
 build/
 develop-eggs/
