@@ -1,8 +1,16 @@
 import sqlite3
 import pandas as pd
 from sklearn.metrics import mean_squared_error
-
+import pickle
 import common
+from train import preprocess_data
+
+def load_model(path):
+    print(f"Loading the model from {path}")
+    with open(path, "rb") as file:
+        model = pickle.load(file)
+    print(f"Done")
+    return model
 
 def load_test_data(path):
     print(f"Reading test data from the database: {path}")
@@ -15,14 +23,14 @@ def load_test_data(path):
 
 def evaluate_model(model, X, y):
     print(f"Evaluating the model")
-    y_pred = model.predict(X)
+    X_preprocessed = preprocess_data(X)
+    y_pred = model.predict(X_preprocessed)
     score = mean_squared_error(y, y_pred)
     return score
 
 if __name__ == "__main__":
 
     X_test, y_test = load_test_data(common.DB_PATH)
-    X_test = common.preprocess_data(X_test)
-    model = common.load_model(common.MODEL_PATH)
+    model = load_model(common.MODEL_PATH)
     score_test = evaluate_model(model, X_test, y_test)
     print(f"Score on test data {score_test:.2f}")

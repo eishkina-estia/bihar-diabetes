@@ -4,6 +4,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
 import common
+import os, pickle
 
 def load_train_data(path):
     print(f"Reading train data from the database: {path}")
@@ -14,18 +15,32 @@ def load_train_data(path):
     y = data_train['target']
     return X, y
 
-def fit_model(X, y):
-    print(f"Fitting a model")
+def preprocess_data(X):
+    print(f"Preprocessing data")
+    return X
+
+def train_model(X, y):
+    print(f"Building a model")
     model = LinearRegression()
-    model.fit(X, y)
-    y_pred = model.predict(X)
+    X_preprocessed = preprocess_data(X)
+    model.fit(X_preprocessed, y)
+    y_pred = model.predict(X_preprocessed)
     score = mean_squared_error(y, y_pred)
     print(f"Score on train data {score:.2f}")
     return model
 
+def persist_model(model, path):
+    print(f"Persisting the model to {path}")
+    model_dir = os.path.dirname(path)
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
+
+    with open(path, "wb") as file:
+        pickle.dump(model, file)
+    print(f"Done")
+
 if __name__ == "__main__":
 
     X_train, y_train = load_train_data(common.DB_PATH)
-    X_train = common.preprocess_data(X_train)
-    model = fit_model(X_train, y_train)
-    common.persist_model(model, common.MODEL_PATH)
+    model = train_model(X_train, y_train)
+    persist_model(model, common.MODEL_PATH)
