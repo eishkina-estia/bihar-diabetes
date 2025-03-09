@@ -6,6 +6,9 @@ from sklearn.metrics import mean_squared_error
 import common
 import os, pickle
 
+DB_PATH = common.CONFIG['paths']['db_path']
+MODEL_PATH = common.CONFIG['paths']['model_path']
+
 def load_train_data(path):
     print(f"Reading train data from the database: {path}")
     con = sqlite3.connect(path)
@@ -41,6 +44,6 @@ def persist_model(model, path):
 
 if __name__ == "__main__":
 
-    X_train, y_train = load_train_data(common.DB_PATH)
+    X_train, y_train = load_train_data(DB_PATH)
     model = train_model(X_train, y_train)
-    persist_model(model, common.MODEL_PATH)
+    persist_model(model, MODEL_PATH)

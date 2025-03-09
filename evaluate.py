@@ -5,6 +5,9 @@ import pickle
 import common
 from train import preprocess_data
 
+DB_PATH = common.CONFIG['paths']['db_path']
+MODEL_PATH = common.CONFIG['paths']['model_path']
+
 def load_model(path):
     print(f"Loading the model from {path}")
     with open(path, "rb") as file:
@@ -30,7 +33,7 @@ def evaluate_model(model, X, y):
 
 if __name__ == "__main__":
 
-    X_test, y_test = load_test_data(common.DB_PATH)
-    model = load_model(common.MODEL_PATH)
+    X_test, y_test = load_test_data(DB_PATH)
+    model = load_model(MODEL_PATH)
     score_test = evaluate_model(model, X_test, y_test)
     print(f"Score on test data {score_test:.2f}")
