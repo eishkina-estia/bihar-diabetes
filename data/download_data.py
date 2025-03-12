@@ -25,22 +25,26 @@ def download_data():
         data_test.to_sql(name='test', con=con, if_exists="replace", index=False)
 
 def test_download_data():
-    print(f"Reading train data from the database: {DB_PATH}")
     with sqlite3.connect(DB_PATH) as con:
         cur = con.cursor()
 
-        # train data
+        print(f"Reading train data from the database: {DB_PATH}")
+        # getting the number of lines in train table
         res = cur.execute("SELECT COUNT(*) FROM train")
         n_rows = res.fetchone()[0]
+        # getting the number of columns in train table
         res = cur.execute("SELECT * FROM train LIMIT 1")
         n_cols = len(res.description)
         print(f'Train data: {n_rows} x {n_cols}')
-        # for column in res.description:
-        #     print(column[0])
+        # show column names
+        # # for column in res.description:
+        # #     print(column[0])
 
-        # test data
+        print(f"Reading test data from the database: {DB_PATH}")
+        # getting the number of lines in test table
         res = cur.execute("SELECT COUNT(*) FROM test")
         n_rows = res.fetchone()[0]
+        # getting the number of columns in test table
         res = cur.execute("SELECT * FROM test LIMIT 1")
         n_cols = len(res.description)
         print(f'Test data: {n_rows} x {n_cols}')
