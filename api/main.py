@@ -1,17 +1,17 @@
-import pickle
-
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
 import sqlite3
 import pandas as pd
+import pickle
+import dill
 
-# need to import DiabetesModel from outside the api root folder
-import os, sys
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-PARENT_DIR = os.path.normpath(os.path.join(ROOT_DIR, ".."))
-sys.path.insert(0, PARENT_DIR)
-from model.DiabetesModel import DiabetesModel
+# # need to import DiabetesModel from outside the api root folder
+# import os, sys
+# ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+# PARENT_DIR = os.path.normpath(os.path.join(ROOT_DIR, ".."))
+# sys.path.insert(0, PARENT_DIR)
+# from model.DiabetesModel import DiabetesModel
 
 
 import config
@@ -21,6 +21,16 @@ MODEL_CUSTOM_PATH = config.CONFIG['paths']['model_custom_path']
 
 
 app = FastAPI()
+
+# load model
+print(f"Loading the model from {MODEL_PATH}")
+with open(MODEL_PATH, "rb") as file:
+    model = pickle.load(file)
+
+# load model created with a custom wrapper class, including custom preprocessing and postprocessing logic
+print(f"Loading the model from {MODEL_CUSTOM_PATH}")
+with open(MODEL_CUSTOM_PATH, "rb") as file:
+    model_custom = dill.load(file)
 
 
 class Patient(BaseModel):
@@ -38,11 +48,6 @@ class Patient(BaseModel):
 
 @app.post("/predict")
 def predict(patient: Patient):
-
-    # load model
-    print(f"Loading the model from {MODEL_PATH}")
-    with open(MODEL_PATH, "rb") as file:
-        model = pickle.load(file)
 
     # get prediction
     input_data = pd.DataFrame([patient.model_dump()])
@@ -67,21 +72,16 @@ def predict(patient: Patient):
 @app.post("/predict_custom")
 def predict_custom(patient: Patient):
 
-    # load model
-    print(f"Loading the model from {MODEL_CUSTOM_PATH}")
-    with open(MODEL_CUSTOM_PATH, "rb") as file:
-        model = pickle.load(file)
-
     # get prediction
     input_data = pd.DataFrame([patient.model_dump()])
-    result = model.predict(input_data)[0]
+    result = model_custom.predict(input_data)[0]
 
     # return prediction
     return {"result": result}
 
 @app.get("/patients/randomtest")
 def get_random_test_patient():
-    print(f"Reading test data from the database: {DB_PATH}")
+    print(f"Reading random test data from the database: {DB_PATH}")
     con = sqlite3.connect(DB_PATH)
     data_test = pd.read_sql('SELECT * FROM test ORDER BY RANDOM() LIMIT 1', con)
     con.close()

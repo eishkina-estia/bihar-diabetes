@@ -6,8 +6,9 @@ Example of separation of data loading and processing, model training and inferen
 
 - `data/download_data.py`: Script for loading data into a local SQLite database (`data\diabetes.db`)
 - `notebooks/EDA.ipynb`: Jupyter notebook for basic exploratory data analysis (EDA).
+- `model/load_data.py`: Script for loading train and test data (data access layer)
 - `model/train.py`: Script for training a model and saving it to the `model-registry` folder
-- `model/evaluate.py`: Script for evaluating the trained model using the test dataset.
+- `model/test_model.py`: Script for testing the access to the pretrained model.
 - `common.py`: Script for loading and preparing config constants from `config.yml` file.
 - `requirements.txt`: List of required Python packages.
 
@@ -30,7 +31,7 @@ This creates the `models/diabetes.model` file, which contains a serialized regre
 ### 3. Test inference
 To test the trained model using the test dataset, run:
 ```shell
-python -m model.evaluate
+python -m model.test_model
 ```
 This script loads the previously saved model and evaluates its performance.
 

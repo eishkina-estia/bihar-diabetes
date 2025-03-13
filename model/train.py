@@ -1,36 +1,53 @@
-import sqlite3
-import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
-import common
-import os, pickle
+import os
+import pickle
 
-DB_PATH = common.CONFIG['paths']['db_path']
+from model.load_data import load_train_data, load_test_data
+
+import common
 MODEL_PATH = common.CONFIG['paths']['model_path']
 
-def load_train_data(path):
-    print(f"Reading train data from the database: {path}")
-    con = sqlite3.connect(path)
-    data_train = pd.read_sql('SELECT * FROM train', con)
-    con.close()
-    X = data_train.drop(columns=['target'])
-    y = data_train['target']
-    return X, y
 
 def preprocess_data(X):
     print(f"Preprocessing data")
     return X
 
-def train_model(X, y):
+
+def train_model():
     print(f"Building a model")
+
+    # load train data
+    X_train, y_train = load_train_data()
+
+    # Build a model
     model = LinearRegression()
-    X_preprocessed = preprocess_data(X)
-    model.fit(X_preprocessed, y)
-    y_pred = model.predict(X_preprocessed)
-    score = mean_squared_error(y, y_pred)
+    X_train_preprocessed = preprocess_data(X_train)
+    model.fit(X_train_preprocessed, y_train)
+
+    # Evaluate the model on train data
+    y_pred = model.predict(X_train_preprocessed)
+    score = mean_squared_error(y_train, y_pred)
     print(f"Score on train data {score:.2f}")
+
     return model
+
+
+def evaluate_model():
+    print(f"Evaluating the model")
+
+    # load test data
+    X_test, y_test = load_test_data()
+
+    # need to do the same preprocessing as for train data
+    X_test_preprocessed = preprocess_data(X_test)
+    y_pred = model.predict(X_test_preprocessed)
+    score = mean_squared_error(y_test, y_pred)
+    print(f"Score on test data {score:.2f}")
+
+    return score
+
 
 def persist_model(model, path):
     print(f"Persisting the model to {path}")
@@ -42,8 +59,13 @@ def persist_model(model, path):
         pickle.dump(model, file)
     print(f"Done")
 
+
 if __name__ == "__main__":
 
-    X_train, y_train = load_train_data(DB_PATH)
-    model = train_model(X_train, y_train)
+    # training workflow
+    # fit model
+    model = train_model()
+    # evaluate model
+    score = evaluate_model()
+    # serialize model in a file
     persist_model(model, MODEL_PATH)
